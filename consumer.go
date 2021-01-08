@@ -9,7 +9,7 @@ import (
 	"github.com/loadimpact/k6/js/modules"
 	"github.com/loadimpact/k6/lib"
 	"github.com/loadimpact/k6/stats"
-	kafkago "github.com/segmentio/kafka-go"
+	"github.com/segmentio/kafka-go"
 )
 
 func init() {
@@ -20,13 +20,13 @@ type Kafka struct{}
 
 func (*Kafka) Reader(
 	brokers []string, topic string, partition int,
-	minBytes int, maxBytes int, offset int64) *kafkago.Reader {
+	minBytes int, maxBytes int, offset int64) *kafka.Reader {
 
 	if maxBytes == 0 {
 		maxBytes = 10e6 // 10MB
 	}
 
-	reader := kafkago.NewReader(kafkago.ReaderConfig{
+	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:          brokers,
 		Topic:            topic,
 		Partition:        partition,
@@ -45,7 +45,7 @@ func (*Kafka) Reader(
 }
 
 func (*Kafka) Consume(
-	ctx context.Context, reader *kafkago.Reader, limit int64,
+	ctx context.Context, reader *kafka.Reader, limit int64,
 	keySchema string, valueSchema string) []map[string]interface{} {
 	state := lib.GetState(ctx)
 
@@ -100,7 +100,7 @@ func (*Kafka) Consume(
 	return messages
 }
 
-func ReportReaderStats(ctx context.Context, currentStats kafkago.ReaderStats) error {
+func ReportReaderStats(ctx context.Context, currentStats kafka.ReaderStats) error {
 	state := lib.GetState(ctx)
 	err := errors.New("State is nil")
 

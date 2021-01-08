@@ -7,20 +7,20 @@ import (
 
 	"github.com/loadimpact/k6/lib"
 	"github.com/loadimpact/k6/stats"
-	kafkago "github.com/segmentio/kafka-go"
+	"github.com/segmentio/kafka-go"
 )
 
-func (*Kafka) Writer(brokers []string, topic string) *kafkago.Writer {
-	return kafkago.NewWriter(kafkago.WriterConfig{
+func (*Kafka) Writer(brokers []string, topic string) *kafka.Writer {
+	return kafka.NewWriter(kafka.WriterConfig{
 		Brokers:   brokers,
 		Topic:     topic,
-		Balancer:  &kafkago.LeastBytes{},
+		Balancer:  &kafka.LeastBytes{},
 		BatchSize: 1,
 	})
 }
 
 func (*Kafka) Produce(
-	ctx context.Context, writer *kafkago.Writer, messages []map[string]string,
+	ctx context.Context, writer *kafka.Writer, messages []map[string]string,
 	keySchema string, valueSchema string) error {
 	state := lib.GetState(ctx)
 	err := errors.New("State is nil")
@@ -30,7 +30,7 @@ func (*Kafka) Produce(
 		return err
 	}
 
-	kafkaMessages := make([]kafkago.Message, len(messages))
+	kafkaMessages := make([]kafka.Message, len(messages))
 	for i, message := range messages {
 		key := []byte(message["key"])
 		if keySchema != "" {
@@ -42,7 +42,7 @@ func (*Kafka) Produce(
 			value = ToAvro(message["value"], valueSchema)
 		}
 
-		kafkaMessages[i] = kafkago.Message{
+		kafkaMessages[i] = kafka.Message{
 			Key:   key,
 			Value: value,
 		}
@@ -64,7 +64,7 @@ func (*Kafka) Produce(
 	return nil
 }
 
-func ReportWriterStats(ctx context.Context, currentStats kafkago.WriterStats) error {
+func ReportWriterStats(ctx context.Context, currentStats kafka.WriterStats) error {
 	state := lib.GetState(ctx)
 	err := errors.New("State is nil")
 
