@@ -41,6 +41,9 @@ export default function () {
     const producer = writer(
         ["localhost:9092"], // bootstrap servers
         "test-k6-plugin-topic", // Kafka topic
+        "kafka", // username
+        "kafka-secret", // password
+        "SHA-512" // hashing algorithm
     )
 
     for (let index = 0; index < 100; index++) {
@@ -78,6 +81,9 @@ export default function () {
     const consumer = reader(
         ["localhost:9092"], // bootstrap servers
         "test-k6-plugin-topic", // Kafka topic
+        "kafka", // username
+        "kafka-secret", // password
+        "SHA-256" // hashing algorithm
     )
 
     // Read 10 messages only

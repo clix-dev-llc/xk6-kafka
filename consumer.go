@@ -20,7 +20,21 @@ type Kafka struct{}
 
 func (*Kafka) Reader(
 	brokers []string, topic string, partition int,
-	minBytes int, maxBytes int, offset int64) *kafka.Reader {
+	minBytes int, maxBytes int, offset int64, auth ...string) *kafka.Reader {
+
+	var dialer *kafka.Dialer
+	creds := &Credentials{}
+	creds.Algorithm = "plain"
+
+	if len(auth) >= 2 {
+		creds.Username = auth[0]
+		creds.Password = auth[1]
+		if len(auth) == 3 {
+			creds.Algorithm = auth[2]
+		}
+	}
+
+	dialer = authenticate(creds)
 
 	if maxBytes == 0 {
 		maxBytes = 10e6 // 10MB
@@ -35,6 +49,7 @@ func (*Kafka) Reader(
 		MaxWait:          time.Millisecond * 200,
 		RebalanceTimeout: time.Second * 5,
 		QueueCapacity:    1,
+		Dialer:           dialer,
 	})
 
 	if offset > 0 {

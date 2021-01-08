@@ -10,12 +10,28 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func (*Kafka) Writer(brokers []string, topic string) *kafka.Writer {
+func (*Kafka) Writer(brokers []string, topic string, auth ...string) *kafka.Writer {
+
+	var dialer *kafka.Dialer
+	creds := &Credentials{}
+	creds.Algorithm = "plain"
+
+	if len(auth) >= 2 {
+		creds.Username = auth[0]
+		creds.Password = auth[1]
+		if len(auth) == 3 {
+			creds.Algorithm = auth[2]
+		}
+	}
+
+	dialer = authenticate(creds)
+
 	return kafka.NewWriter(kafka.WriterConfig{
 		Brokers:   brokers,
 		Topic:     topic,
 		Balancer:  &kafka.LeastBytes{},
 		BatchSize: 1,
+		Dialer:    dialer,
 	})
 }
 
